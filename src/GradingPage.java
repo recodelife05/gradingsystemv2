@@ -7,16 +7,28 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
+import java.util.*;
+import java.util.List;
+import java.util.function.Predicate;
+
+import static java.util.spi.ToolProvider.findFirst;
 
 
 //TODO: removed is not yet working in computation.
 public class GradingPage extends JFrame {
 
+    int TOTALRECORDS = 0;
+    double EXAM_PERCENTAGE = 0.40;
+    double ACTIVITYANDLAB_PERCENTAGE = 0.30;
     JLabel totalActivityLabel = new JLabel();
     JLabel totalLabLabel = new JLabel();
     JLabel totalExamLabel = new JLabel();
     JLabel finalGradeLabel = new JLabel();
+
+    String CurrentSelectedActivity = GradeType.ACTIVITY.toString();
+    GradeType CurrentSelectAct = GradeType.ACTIVITY;
+
+    JComboBox activityComboBox = new JComboBox();
     JTextField activityTextField = new JTextField();
     DefaultListModel<Double> activityGrades = new DefaultListModel<>();
     DefaultListModel<Double> labGrades = new DefaultListModel<>();
@@ -25,8 +37,12 @@ public class GradingPage extends JFrame {
     JButton examComputeBtn = new JButton("Add Exam Score");
     JButton labComputeBtn = new JButton("Add Lab Score");
     JButton finalGradeBtn = new JButton("Compute Final Grade");
+    JButton addRecordBtn = new JButton("Add Record");
     JButton removedRecordsBtn = new JButton("Removed records");
     JTable activityTable = new JTable();
+    //0-3
+    String[] columnNames = {"Select","Grade Type", "Score","Id"};
+    ArrayList<GradeRecord> grades = new ArrayList<>();
     DefaultTableModel model = new DefaultTableModel();
     String ACTIVITYGRADE = "Activity Grade";
     String LABGRADE = "Laboratory Grade";
@@ -36,12 +52,10 @@ public class GradingPage extends JFrame {
     double TotalActivity = 0;
     double TotalExam = 0;
     double TotalLab = 0;
-
     GradingPage(){
         InitializedComponents();
         SetEvents();
     }
-    public JTextField[] activityScores = new JTextField[10];
     public void InitializedComponents(){
         this.setTitle("Grading System");
         this.setSize(500,500);
@@ -50,7 +64,14 @@ public class GradingPage extends JFrame {
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        String[] columnNames = {"Select","Grade Type", "Score"};
+
+
+
+        String selectActivity[] = { GradeType.ACTIVITY.toString(),GradeType.LAB.toString(),GradeType.EXAM.toString() };
+        //set combobox
+        activityComboBox = new JComboBox(selectActivity);
+        activityComboBox.setSize(new Dimension(20,20));
+        mainPanel.add(activityComboBox);
 
         //set select
          model = new DefaultTableModel() {
@@ -68,6 +89,8 @@ public class GradingPage extends JFrame {
             }
         };
 
+
+
         activityTable.setModel(model);
         activityTable = new JTable(model);
         activityTable.setBounds(30, 40, 200, 300);
@@ -75,19 +98,38 @@ public class GradingPage extends JFrame {
         Arrays.stream(columnNames).forEach(f -> {
             model.addColumn(f);
         });
-
+        /*
         mainPanel.add(activityComputeBtn);
         mainPanel.add(labComputeBtn);
         mainPanel.add(examComputeBtn);
-        mainPanel.add(finalGradeBtn);
-        mainPanel.add(removedRecordsBtn);
+        */
+
+        JPanel panelSummary = new JPanel(new GridLayout(3, 2));
+        panelSummary.setLayout(new BoxLayout(panelSummary, BoxLayout.Y_AXIS));
+        panelSummary.setBorder(BorderFactory.createTitledBorder("Grade Summary"));
+
+
+        mainPanel.add(activityTextField);
+        mainPanel.add(addRecordBtn);
+
+        /*
+        TODO: add more design on log in page and set alignments
+        panelSummary.add(totalActivityLabel);
+        panelSummary.add(totalLabLabel);
+        panelSummary.add(totalExamLabel);
+        panelSummary.add(finalGradeLabel);
+        mainPanel.add(panelSummary);
+        */
         mainPanel.add(totalActivityLabel);
         mainPanel.add(totalLabLabel);
         mainPanel.add(totalExamLabel);
         mainPanel.add(finalGradeLabel);
-        mainPanel.add(activityTextField);
 
         mainPanel.add(new JScrollPane(activityTable));
+
+        mainPanel.add(removedRecordsBtn);
+        mainPanel.add(finalGradeBtn);
+
 
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -96,55 +138,6 @@ public class GradingPage extends JFrame {
         setLocationRelativeTo(null);
     }
     private void SetEvents(){
-        activityComputeBtn.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                TotalActivity = 0;
-                Double currentScore = Double.parseDouble(activityTextField.getText());
-
-                model.addRow(new Object[] {false, ACTIVITYGRADE,currentScore.toString() });
-                activityGrades.add(0,currentScore);
-                activityGrades.elements().asIterator()
-                        .forEachRemaining(r ->
-                                        TotalActivity += r.doubleValue()
-                                );
-                System.out.println("activity grades count" + activityGrades.getSize());
-                totalActivityLabel.setText("Total " + ACTIVITYGRADE + ":" + TotalActivity / activityGrades.getSize());
-            }
-        });
-
-        labComputeBtn.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                TotalLab = 0;
-                Double currentScore = Double.parseDouble(activityTextField.getText());
-                model.addRow(new Object[] {false,LABGRADE,currentScore.toString()});
-                labGrades.add(0,currentScore);
-                labGrades.elements().asIterator()
-                        .forEachRemaining(r ->
-                                TotalLab +=  r.doubleValue()
-                        );
-
-                totalLabLabel.setText(String.format("Total " + LABGRADE + ": %.2f", TotalLab / labGrades.getSize()));
-
-            }
-        });
-
-        examComputeBtn.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                TotalExam = 0;
-                Double currentScore = Double.parseDouble(activityTextField.getText());
-                model.addRow(new Object[] {false,EXAMGRADE,currentScore.toString()});
-                examGrades.add(0,currentScore);
-                examGrades.elements().asIterator()
-                        .forEachRemaining(r ->
-                                TotalExam +=  r.doubleValue()
-                        );
-
-                totalExamLabel.setText(String.format("Total " + EXAMGRADE + ": %.2f", TotalExam / examGrades.getSize()));
-            }
-        });
 
         finalGradeBtn.addActionListener(new ActionListener() {
             @Override
@@ -160,32 +153,124 @@ public class GradingPage extends JFrame {
 
                         Boolean checked = Boolean.valueOf(activityTable.getValueAt(i,0).toString());
                         String col  = activityTable.getValueAt(i,1).toString();
+                        String gradeIdToRemoved  = activityTable.getValueAt(i,3).toString();
                         System.out.println(checked);
                         if(checked){
                             System.out.println(i);
                             ((DefaultTableModel) activityTable.getModel()).removeRow(i);
+
+                            Predicate<GradeRecord> lambda = r->r.GradeId.equals(gradeIdToRemoved);
+                            Integer indexToRemoved = Integer.parseInt(gradeIdToRemoved);
+                            var item = grades.stream().filter(r->r.GradeId.equals(indexToRemoved.intValue())).findFirst();
+                            grades.remove(item.get());
                             //TODO: should not refer on the List for computation.
                         }
 
                     }
             }
         });
+
+        addRecordBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                var totalExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).map(r->r.Score).reduce(0.00,Double::sum);
+                var countExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).count();
+                var totalActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).map(r->r.Score).reduce(0.00,Double::sum);
+                var countActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).count();
+                var totalLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).reduce(0.00,Double::sum);
+                var countLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).count();
+                Double currentScore = Double.parseDouble(activityTextField.getText());
+
+                var newRecord = new GradeRecord();
+                newRecord.Score = currentScore;
+                var modelRow =  AddNewRecord(newRecord);
+                model.addRow(new Object[] { modelRow.IsSelected,modelRow.Type, modelRow.Score,modelRow.GradeId });
+
+                System.out.println("count exam: "+ countExam + ", from addRecord " + totalExam / countExam);
+                //set summary
+                totalExamLabel.setText(String.format("Total " + EXAMGRADE + ": %.2f", totalExam /countExam));
+                totalLabLabel.setText(String.format("Total " + LABGRADE + ": %.2f", totalLab / countLab));
+                totalActivityLabel.setText("Total " + ACTIVITYGRADE + ":" + totalActivity / countActivity);
+            }
+        });
+
+        activityComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                var itemSelected = activityComboBox.getSelectedItem();
+                CurrentSelectedActivity = itemSelected.toString();
+                CurrentSelectAct = GradeType.valueOf(itemSelected.toString());;
+                System.out.println(CurrentSelectedActivity);
+            }
+        });
+    }
+
+
+    public GradeRecord AddNewRecord(GradeRecord record){
+
+        if(record.Score > 100 || record.Score <= 50){
+            new Throwable("Invalid Score must be range of 50 to 100");
+        }
+        //identity of record id
+        TOTALRECORDS += 1;
+        record.GradeId = TOTALRECORDS;
+        record.Type = CurrentSelectAct;
+        grades.add(record);
+        return record;
     }
     public void ComputeFinalGrade(){
 
-        //exam * 40, lab 30percent , activity .30
-        System.out.println("total lab: " + (TotalLab/ labGrades.getSize()) * 0.30);
-        System.out.println("total exam: " + ((TotalExam / examGrades.getSize()) * 0.40));
-        System.out.println("total activity: " +((TotalActivity / activityGrades.getSize()) * 0.30));
-        double finalGrade = ((TotalLab/ labGrades.getSize()) * 0.30) +
-                ((TotalActivity / activityGrades.getSize()) * 0.30) +
-                ((TotalExam / examGrades.getSize()) * 0.40);
+        var summary = new GradeSummary();
+        summary.Compute();
+
+        System.out.println("total lab: " + (TotalLab/ summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE);
+        System.out.println("total exam: " + ((TotalExam / summary.CountExam) * EXAM_PERCENTAGE));
+        System.out.println("total activity: " + ((TotalActivity / summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE));
+        double finalGrade = ((summary.TotalLab / summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE) +
+                ((summary.TotalActivity /summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE) +
+                ((summary.TotalExam / summary.CountExam) * EXAM_PERCENTAGE);
+
         finalGradeLabel.setText(String.format(FINALEGRADE + ": %.2f", finalGrade));
         if (finalGrade < 70) {
             finalGradeLabel.setForeground(Color.RED);
         } else {
             finalGradeLabel.setForeground(Color.BLACK);
         }
+    }
+
+    public class GradeRecord {
+        public Boolean IsSelected = false;
+        public Integer GradeId;
+        public Double Score;
+        public GradeType Type;
+    }
+
+    public  class GradeSummary {
+
+        public double TotalExam;
+        public long CountExam;
+        public double AverageOfExam;
+        public double TotalActivity;
+        public long CountActivity;
+        public double TotalLab;
+        public long CountLab;
+
+        void Compute(){
+            TotalExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).map(r->r.Score).reduce(0.00,Double::sum);
+            CountExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).count();
+            TotalActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).map(r->r.Score).reduce(0.00,Double::sum);
+            CountActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).count();
+            TotalLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).reduce(0.00,Double::sum);
+            CountLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).count();
+            AverageOfExam = TotalExam / CountExam;
+        }
+    }
+
+
+    enum GradeType {
+        ACTIVITY,
+        EXAM,
+        LAB
     }
 
 
