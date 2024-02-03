@@ -36,6 +36,7 @@ public class GradingPage extends JFrame {
     String LABGRADE = "Laboratory Grade";
     String EXAMGRADE = "Exam Grade";
     String FINALEGRADE = "Final Grade";
+    JPanel mainPanel = new JPanel();
     GradingPage(){
         InitializedComponents();
         SetEvents();
@@ -44,7 +45,7 @@ public class GradingPage extends JFrame {
         this.setTitle("Grading System");
         this.setSize(500,500);
         this.setLayout(new GridLayout(1, 3, 10, 10));
-        JPanel mainPanel = new JPanel();
+
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -78,30 +79,27 @@ public class GradingPage extends JFrame {
             model.addColumn(f);
         });
 
-        JPanel panelSummary = new JPanel(new GridLayout(3, 2));
-        panelSummary.setLayout(new BoxLayout(panelSummary, BoxLayout.Y_AXIS));
-        panelSummary.setBorder(BorderFactory.createTitledBorder("Grade Summary"));
-
-
-        mainPanel.add(activityTextField);
-        mainPanel.add(addRecordBtn);
-        mainPanel.add(errorMessage);
-
-        mainPanel.add(totalActivityLabel);
-        mainPanel.add(totalLabLabel);
-        mainPanel.add(totalExamLabel);
-        mainPanel.add(finalGradeLabel);
-
-        mainPanel.add(new JScrollPane(activityTable));
-
-        mainPanel.add(removedRecordsBtn);
-        mainPanel.add(finalGradeBtn);
+        AddSubModules();
 
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().add(mainPanel, BorderLayout.SOUTH);
         pack();
         setLocationRelativeTo(null);
+    }
+
+    private  void AddSubModules(){
+
+        mainPanel.add(activityTextField);
+        mainPanel.add(addRecordBtn);
+        mainPanel.add(errorMessage);
+        mainPanel.add(totalActivityLabel);
+        mainPanel.add(totalLabLabel);
+        mainPanel.add(totalExamLabel);
+        mainPanel.add(finalGradeLabel);
+        mainPanel.add(new JScrollPane(activityTable));
+        mainPanel.add(removedRecordsBtn);
+        mainPanel.add(finalGradeBtn);
     }
     private void SetEvents(){
 
