@@ -3,17 +3,14 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Vector;
-import java.util.stream.Stream;
-import javax.swing.table.TableCellRenderer;
 
+
+//TODO: removed is not yet working in computation.
 public class GradingPage extends JFrame {
 
     JLabel totalActivityLabel = new JLabel();
@@ -72,15 +69,12 @@ public class GradingPage extends JFrame {
         };
 
         activityTable.setModel(model);
-
-
         activityTable = new JTable(model);
         activityTable.setBounds(30, 40, 200, 300);
 
         Arrays.stream(columnNames).forEach(f -> {
             model.addColumn(f);
         });
-
 
         mainPanel.add(activityComputeBtn);
         mainPanel.add(labComputeBtn);
@@ -170,13 +164,13 @@ public class GradingPage extends JFrame {
                         if(checked){
                             System.out.println(i);
                             ((DefaultTableModel) activityTable.getModel()).removeRow(i);
+                            //TODO: should not refer on the List for computation.
                         }
 
                     }
             }
         });
     }
-
     public void ComputeFinalGrade(){
 
         //exam * 40, lab 30percent , activity .30
@@ -194,25 +188,6 @@ public class GradingPage extends JFrame {
         }
     }
 
-    class ButtonRenderer extends JButton implements TableCellRenderer {
 
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            if (isSelected) {
-                setForeground(table.getSelectionForeground());
-                setBackground(table.getSelectionBackground());
-            } else {
-                setForeground(table.getForeground());
-                setBackground(UIManager.getColor("Button.background"));
-            }
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
 
 }
