@@ -1,20 +1,14 @@
-import javax.sound.midi.SysexMessage;
+
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.List;
 import java.util.function.Predicate;
 
-import static java.util.spi.ToolProvider.findFirst;
 
-
-//TODO: removed is not yet working in computation.
 public class GradingPage extends JFrame {
 
     int TOTALRECORDS = 0;
@@ -24,10 +18,11 @@ public class GradingPage extends JFrame {
     JLabel totalLabLabel = new JLabel();
     JLabel totalExamLabel = new JLabel();
     JLabel finalGradeLabel = new JLabel();
-
+    JLabel errorMessage = new JLabel();
     String CurrentSelectedActivity = GradeType.ACTIVITY.toString();
     GradeType CurrentSelectAct = GradeType.ACTIVITY;
 
+    String ERROR_MESSAGE_INVALID_RANGE = "\"Invalid Score must be range of 50 to 100\"";
     JComboBox activityComboBox = new JComboBox();
     JTextField activityTextField = new JTextField();
     DefaultListModel<Double> activityGrades = new DefaultListModel<>();
@@ -111,6 +106,7 @@ public class GradingPage extends JFrame {
 
         mainPanel.add(activityTextField);
         mainPanel.add(addRecordBtn);
+        mainPanel.add(errorMessage);
 
         /*
         TODO: add more design on log in page and set alignments
@@ -173,24 +169,11 @@ public class GradingPage extends JFrame {
         addRecordBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                var totalExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).map(r->r.Score).reduce(0.00,Double::sum);
-                var countExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).count();
-                var totalActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).map(r->r.Score).reduce(0.00,Double::sum);
-                var countActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).count();
-                var totalLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).reduce(0.00,Double::sum);
-                var countLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).count();
-                Double currentScore = Double.parseDouble(activityTextField.getText());
-
-                var newRecord = new GradeRecord();
-                newRecord.Score = currentScore;
-                var modelRow =  AddNewRecord(newRecord);
-                model.addRow(new Object[] { modelRow.IsSelected,modelRow.Type, modelRow.Score,modelRow.GradeId });
-
-                System.out.println("count exam: "+ countExam + ", from addRecord " + totalExam / countExam);
-                //set summary
-                totalExamLabel.setText(String.format("Total " + EXAMGRADE + ": %.2f", totalExam /countExam));
-                totalLabLabel.setText(String.format("Total " + LABGRADE + ": %.2f", totalLab / countLab));
-                totalActivityLabel.setText("Total " + ACTIVITYGRADE + ":" + totalActivity / countActivity);
+                try {
+                    AddAndDisplayRecord();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -205,12 +188,34 @@ public class GradingPage extends JFrame {
         });
     }
 
+    public void AddAndDisplayRecord() throws Exception {
+        var summary = new GradeSummary();
+        summary.Compute();
 
-    public GradeRecord AddNewRecord(GradeRecord record){
+        Double currentScore = Double.parseDouble(activityTextField.getText());
 
-        if(record.Score > 100 || record.Score <= 50){
-            new Throwable("Invalid Score must be range of 50 to 100");
+        var newRecord = new GradeRecord();
+        newRecord.Score = currentScore;
+        var modelRow =  AddNewRecord(newRecord);
+        model.addRow(new Object[] { modelRow.IsSelected,modelRow.Type, modelRow.Score,modelRow.GradeId });
+
+        System.out.println("count exam: "+ summary.CountExam + ", from addRecord " +  summary.AverageOfExam);
+        //set summary
+        totalExamLabel.setText(String.format("Total " + EXAMGRADE + ": %.2f", summary.AverageOfExam));
+        totalLabLabel.setText(String.format("Total " + LABGRADE + ": %.2f", summary.TotalLab / summary.CountLab));
+        totalActivityLabel.setText("Total " + ACTIVITYGRADE + ":" + summary.TotalActivity / summary.CountActivity);
+    }
+
+    public GradeRecord AddNewRecord(GradeRecord record) throws Exception {
+
+
+        if (record.Score <= 50.00 || record.Score > 100){
+            errorMessage.setText(ERROR_MESSAGE_INVALID_RANGE);
+            errorMessage.setForeground(Color.RED);
+            throw new Exception(ERROR_MESSAGE_INVALID_RANGE);
         }
+
+        errorMessage.setText("");
         //identity of record id
         TOTALRECORDS += 1;
         record.GradeId = TOTALRECORDS;
@@ -238,13 +243,14 @@ public class GradingPage extends JFrame {
         }
     }
 
+
+    //TODO: to move these class and enum to other folders.
     public class GradeRecord {
         public Boolean IsSelected = false;
         public Integer GradeId;
         public Double Score;
         public GradeType Type;
     }
-
     public  class GradeSummary {
 
         public double TotalExam;
@@ -265,8 +271,6 @@ public class GradingPage extends JFrame {
             AverageOfExam = TotalExam / CountExam;
         }
     }
-
-
     enum GradeType {
         ACTIVITY,
         EXAM,
