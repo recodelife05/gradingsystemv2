@@ -7,9 +7,12 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
+import java.util.Vector;
+import java.util.stream.Stream;
+import javax.swing.table.TableCellRenderer;
 
 public class GradingPage extends JFrame {
 
@@ -25,6 +28,7 @@ public class GradingPage extends JFrame {
     JButton examComputeBtn = new JButton("Add Exam Score");
     JButton labComputeBtn = new JButton("Add Lab Score");
     JButton finalGradeBtn = new JButton("Compute Final Grade");
+    JButton removedRecordsBtn = new JButton("Removed records");
     JTable activityTable = new JTable();
     DefaultTableModel model = new DefaultTableModel();
     String ACTIVITYGRADE = "Activity Grade";
@@ -49,9 +53,27 @@ public class GradingPage extends JFrame {
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        String[] columnNames = { "Grade Type", "Score"};
+        String[] columnNames = {"Select","Grade Type", "Score"};
 
-        model = (DefaultTableModel) activityTable.getModel();
+        //set select
+         model = new DefaultTableModel() {
+            public Class<?> getColumnClass(int column) {
+                switch (column) {
+                    case 0:
+                        return Boolean.class;
+                    case 1:
+                        return String.class;
+                    case 2:
+                        return String.class;
+                    default:
+                        return  String.class;
+                }
+            }
+        };
+
+        activityTable.setModel(model);
+
+
         activityTable = new JTable(model);
         activityTable.setBounds(30, 40, 200, 300);
 
@@ -59,10 +81,12 @@ public class GradingPage extends JFrame {
             model.addColumn(f);
         });
 
+
         mainPanel.add(activityComputeBtn);
         mainPanel.add(labComputeBtn);
         mainPanel.add(examComputeBtn);
         mainPanel.add(finalGradeBtn);
+        mainPanel.add(removedRecordsBtn);
         mainPanel.add(totalActivityLabel);
         mainPanel.add(totalLabLabel);
         mainPanel.add(totalExamLabel);
@@ -83,7 +107,8 @@ public class GradingPage extends JFrame {
             public void actionPerformed(ActionEvent e){
                 TotalActivity = 0;
                 Double currentScore = Double.parseDouble(activityTextField.getText());
-                model.addRow(new Object[] {ACTIVITYGRADE,currentScore.toString()});
+
+                model.addRow(new Object[] {false, ACTIVITYGRADE,currentScore.toString() });
                 activityGrades.add(0,currentScore);
                 activityGrades.elements().asIterator()
                         .forEachRemaining(r ->
@@ -99,7 +124,7 @@ public class GradingPage extends JFrame {
             public void actionPerformed(ActionEvent e){
                 TotalLab = 0;
                 Double currentScore = Double.parseDouble(activityTextField.getText());
-                model.addRow(new Object[] {LABGRADE,currentScore.toString()});
+                model.addRow(new Object[] {false,LABGRADE,currentScore.toString()});
                 labGrades.add(0,currentScore);
                 labGrades.elements().asIterator()
                         .forEachRemaining(r ->
@@ -116,7 +141,7 @@ public class GradingPage extends JFrame {
             public void actionPerformed(ActionEvent e){
                 TotalExam = 0;
                 Double currentScore = Double.parseDouble(activityTextField.getText());
-                model.addRow(new Object[] {EXAMGRADE,currentScore.toString()});
+                model.addRow(new Object[] {false,EXAMGRADE,currentScore.toString()});
                 examGrades.add(0,currentScore);
                 examGrades.elements().asIterator()
                         .forEachRemaining(r ->
@@ -131,6 +156,23 @@ public class GradingPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ComputeFinalGrade();
+            }
+        });
+
+        removedRecordsBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    for(int i = 0; i < activityTable.getRowCount(); i++){
+
+                        Boolean checked = Boolean.valueOf(activityTable.getValueAt(i,0).toString());
+                        String col  = activityTable.getValueAt(i,1).toString();
+                        System.out.println(checked);
+                        if(checked){
+                            System.out.println(i);
+                            ((DefaultTableModel) activityTable.getModel()).removeRow(i);
+                        }
+
+                    }
             }
         });
     }
@@ -149,6 +191,27 @@ public class GradingPage extends JFrame {
             finalGradeLabel.setForeground(Color.RED);
         } else {
             finalGradeLabel.setForeground(Color.BLACK);
+        }
+    }
+
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else {
+                setForeground(table.getForeground());
+                setBackground(UIManager.getColor("Button.background"));
+            }
+            setText((value == null) ? "" : value.toString());
+            return this;
         }
     }
 
