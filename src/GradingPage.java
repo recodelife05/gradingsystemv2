@@ -126,7 +126,6 @@ public class GradingPage extends JFrame {
         mainPanel.add(removedRecordsBtn);
         mainPanel.add(finalGradeBtn);
 
-
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().add(mainPanel, BorderLayout.SOUTH);
@@ -189,7 +188,7 @@ public class GradingPage extends JFrame {
     }
 
     public void AddAndDisplayRecord() throws Exception {
-        var summary = new GradeSummary();
+        var summary = new GradeSummary(grades);
         summary.Compute();
 
         Double currentScore = Double.parseDouble(activityTextField.getText());
@@ -225,7 +224,7 @@ public class GradingPage extends JFrame {
     }
     public void ComputeFinalGrade(){
 
-        var summary = new GradeSummary();
+        var summary = new GradeSummary(grades);
         summary.Compute();
 
         System.out.println("total lab: " + (TotalLab/ summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE);
@@ -245,38 +244,12 @@ public class GradingPage extends JFrame {
 
 
     //TODO: to move these class and enum to other folders.
-    public class GradeRecord {
-        public Boolean IsSelected = false;
-        public Integer GradeId;
-        public Double Score;
-        public GradeType Type;
-    }
-    public  class GradeSummary {
 
-        public double TotalExam;
-        public long CountExam;
-        public double AverageOfExam;
-        public double TotalActivity;
-        public long CountActivity;
-        public double TotalLab;
-        public long CountLab;
 
-        void Compute(){
-            TotalExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).map(r->r.Score).reduce(0.00,Double::sum);
-            CountExam = grades.stream().filter(r->r.Type.equals(GradeType.EXAM)).count();
-            TotalActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).map(r->r.Score).reduce(0.00,Double::sum);
-            CountActivity = grades.stream().filter(r->r.Type.equals(GradeType.ACTIVITY)).count();
-            TotalLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).reduce(0.00,Double::sum);
-            CountLab = grades.stream().filter(r->r.Type.equals(GradeType.LAB)).map(r->r.Score).count();
-            AverageOfExam = TotalExam / CountExam;
-        }
-    }
     enum GradeType {
         ACTIVITY,
         EXAM,
         LAB
     }
-
-
 
 }
