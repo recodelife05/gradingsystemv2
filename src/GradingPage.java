@@ -21,16 +21,9 @@ public class GradingPage extends JFrame {
     JLabel errorMessage = new JLabel();
     String CurrentSelectedActivity = GradeType.ACTIVITY.toString();
     GradeType CurrentSelectAct = GradeType.ACTIVITY;
-
     String ERROR_MESSAGE_INVALID_RANGE = "\"Invalid Score must be range of 50 to 100\"";
     JComboBox activityComboBox = new JComboBox();
     JTextField activityTextField = new JTextField();
-    DefaultListModel<Double> activityGrades = new DefaultListModel<>();
-    DefaultListModel<Double> labGrades = new DefaultListModel<>();
-    DefaultListModel<Double> examGrades = new DefaultListModel<>();
-    JButton activityComputeBtn = new JButton("Add Compute Activity");
-    JButton examComputeBtn = new JButton("Add Exam Score");
-    JButton labComputeBtn = new JButton("Add Lab Score");
     JButton finalGradeBtn = new JButton("Compute Final Grade");
     JButton addRecordBtn = new JButton("Add Record");
     JButton removedRecordsBtn = new JButton("Removed records");
@@ -43,10 +36,6 @@ public class GradingPage extends JFrame {
     String LABGRADE = "Laboratory Grade";
     String EXAMGRADE = "Exam Grade";
     String FINALEGRADE = "Final Grade";
-    String[][] data = { };
-    double TotalActivity = 0;
-    double TotalExam = 0;
-    double TotalLab = 0;
     GradingPage(){
         InitializedComponents();
         SetEvents();
@@ -59,9 +48,6 @@ public class GradingPage extends JFrame {
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-
-
-
         String selectActivity[] = { GradeType.ACTIVITY.toString(),GradeType.LAB.toString(),GradeType.EXAM.toString() };
         //set combobox
         activityComboBox = new JComboBox(selectActivity);
@@ -69,7 +55,7 @@ public class GradingPage extends JFrame {
         mainPanel.add(activityComboBox);
 
         //set select
-         model = new DefaultTableModel() {
+        model = new DefaultTableModel() {
             public Class<?> getColumnClass(int column) {
                 switch (column) {
                     case 0:
@@ -84,8 +70,6 @@ public class GradingPage extends JFrame {
             }
         };
 
-
-
         activityTable.setModel(model);
         activityTable = new JTable(model);
         activityTable.setBounds(30, 40, 200, 300);
@@ -93,11 +77,6 @@ public class GradingPage extends JFrame {
         Arrays.stream(columnNames).forEach(f -> {
             model.addColumn(f);
         });
-        /*
-        mainPanel.add(activityComputeBtn);
-        mainPanel.add(labComputeBtn);
-        mainPanel.add(examComputeBtn);
-        */
 
         JPanel panelSummary = new JPanel(new GridLayout(3, 2));
         panelSummary.setLayout(new BoxLayout(panelSummary, BoxLayout.Y_AXIS));
@@ -108,14 +87,6 @@ public class GradingPage extends JFrame {
         mainPanel.add(addRecordBtn);
         mainPanel.add(errorMessage);
 
-        /*
-        TODO: add more design on log in page and set alignments
-        panelSummary.add(totalActivityLabel);
-        panelSummary.add(totalLabLabel);
-        panelSummary.add(totalExamLabel);
-        panelSummary.add(finalGradeLabel);
-        mainPanel.add(panelSummary);
-        */
         mainPanel.add(totalActivityLabel);
         mainPanel.add(totalLabLabel);
         mainPanel.add(totalExamLabel);
@@ -186,7 +157,6 @@ public class GradingPage extends JFrame {
             }
         });
     }
-
     public void AddAndDisplayRecord() throws Exception {
         var summary = new GradeSummary(grades);
         summary.Compute();
@@ -204,7 +174,6 @@ public class GradingPage extends JFrame {
         totalLabLabel.setText(String.format("Total " + LABGRADE + ": %.2f", summary.TotalLab / summary.CountLab));
         totalActivityLabel.setText("Total " + ACTIVITYGRADE + ":" + summary.TotalActivity / summary.CountActivity);
     }
-
     public GradeRecord AddNewRecord(GradeRecord record) throws Exception {
 
 
@@ -227,9 +196,9 @@ public class GradingPage extends JFrame {
         var summary = new GradeSummary(grades);
         summary.Compute();
 
-        System.out.println("total lab: " + (TotalLab/ summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE);
-        System.out.println("total exam: " + ((TotalExam / summary.CountExam) * EXAM_PERCENTAGE));
-        System.out.println("total activity: " + ((TotalActivity / summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE));
+        System.out.println("total lab: " + (summary.TotalLab/ summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE);
+        System.out.println("total exam: " + ((summary.TotalActivity / summary.CountExam) * EXAM_PERCENTAGE));
+        System.out.println("total activity: " + ((summary.TotalExam / summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE));
         double finalGrade = ((summary.TotalLab / summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE) +
                 ((summary.TotalActivity /summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE) +
                 ((summary.TotalExam / summary.CountExam) * EXAM_PERCENTAGE);
@@ -241,11 +210,6 @@ public class GradingPage extends JFrame {
             finalGradeLabel.setForeground(Color.BLACK);
         }
     }
-
-
-    //TODO: to move these class and enum to other folders.
-
-
     enum GradeType {
         ACTIVITY,
         EXAM,
