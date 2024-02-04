@@ -7,12 +7,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -46,6 +43,8 @@ public class GradingPage extends JFrame {
     String FINALEGRADE = "Final Grade";
 
     String CurrentUser;
+
+    //load image background here.
     BufferedImage backgroundImage = ImageIO.read(new File("resource/background.jpg"));
     ImagePanel mainPanel = new ImagePanel(backgroundImage);
     GradingPage(String UserName) throws URISyntaxException, IOException {
