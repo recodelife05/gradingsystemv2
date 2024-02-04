@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.UnknownServiceException;
 import java.util.ArrayList;
 
 public class LoginPage extends JFrame {

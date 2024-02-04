@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.function.Predicate;
-
 
 public class GradingPage extends JFrame {
 
@@ -41,19 +39,19 @@ public class GradingPage extends JFrame {
     String LABGRADE = "Laboratory Grade";
     String EXAMGRADE = "Exam Grade";
     String FINALEGRADE = "Final Grade";
-
     String CurrentUser;
 
     //load image background here.
     BufferedImage backgroundImage = ImageIO.read(new File("resource/background.jpg"));
     ImagePanel mainPanel = new ImagePanel(backgroundImage);
-    GradingPage(String UserName) throws URISyntaxException, IOException {
+
+    GradingPage(String UserName) throws IOException {
         CurrentUser = UserName;
         InitializedComponents();
         SetFontColor();
         SetEvents();
     }
-    public void InitializedComponents() throws URISyntaxException, IOException {
+    public void InitializedComponents() {
         this.setTitle("Grading System");
         this.setSize(500,500);
         this.setLayout(new GridLayout(1, 3, 10, 10));
@@ -61,8 +59,6 @@ public class GradingPage extends JFrame {
         userLabel.setText("Welcome: " + CurrentUser);
 
         mainPanel.add(userLabel);
-
-
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -104,10 +100,9 @@ public class GradingPage extends JFrame {
         pack();
         setLocationRelativeTo(null);
     }
-
     private void SetFontColor(){
         //https://codepen.io/HunorMarton/details/eWvewo
-        Color color = Color.getHSBColor(315,89,100);
+        Color color = Color.black;
         totalLabLabel.setForeground(color);
         totalExamLabel.setForeground(color);
         finalGradeLabel.setForeground(color);
@@ -148,7 +143,6 @@ public class GradingPage extends JFrame {
                             System.out.println(i);
                             ((DefaultTableModel) activityTable.getModel()).removeRow(i);
 
-                            Predicate<GradeRecord> lambda = r->r.GradeId.equals(gradeIdToRemoved);
                             Integer indexToRemoved = Integer.parseInt(gradeIdToRemoved);
                             var item = grades.stream().filter(r->r.GradeId.equals(indexToRemoved.intValue())).findFirst();
                             grades.remove(item.get());
