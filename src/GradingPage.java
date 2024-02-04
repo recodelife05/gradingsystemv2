@@ -87,7 +87,6 @@ public class GradingPage extends JFrame {
         pack();
         setLocationRelativeTo(null);
     }
-
     private  void AddSubModules(){
 
         mainPanel.add(activityTextField);
@@ -158,6 +157,7 @@ public class GradingPage extends JFrame {
     public void AddAndDisplayRecord() throws Exception {
         var summary = new GradeSummary(grades);
         summary.Compute();
+        summary.Print();
 
         Double currentScore = Double.parseDouble(activityTextField.getText());
 
@@ -165,15 +165,12 @@ public class GradingPage extends JFrame {
         newRecord.Score = currentScore;
         var modelRow =  AddNewRecord(newRecord);
         model.addRow(new Object[] { modelRow.IsSelected,modelRow.Type, modelRow.Score,modelRow.GradeId });
-
-        System.out.println("count exam: "+ summary.CountExam + ", from addRecord " +  summary.AverageOfExam);
         //set summary
         totalExamLabel.setText(String.format("Total " + EXAMGRADE + ": %.2f", summary.AverageOfExam));
         totalLabLabel.setText(String.format("Total " + LABGRADE + ": %.2f", summary.TotalLab / summary.CountLab));
         totalActivityLabel.setText("Total " + ACTIVITYGRADE + ":" + summary.TotalActivity / summary.CountActivity);
     }
     public GradeRecord AddNewRecord(GradeRecord record) throws Exception {
-
 
         if (record.Score <= 50.00 || record.Score > 100){
             errorMessage.setText(ERROR_MESSAGE_INVALID_RANGE);
@@ -193,10 +190,8 @@ public class GradingPage extends JFrame {
 
         var summary = new GradeSummary(grades);
         summary.Compute();
+        summary.Print();
 
-        System.out.println("total lab: " + (summary.TotalLab/ summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE);
-        System.out.println("total exam: " + ((summary.TotalActivity / summary.CountExam) * EXAM_PERCENTAGE));
-        System.out.println("total activity: " + ((summary.TotalExam / summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE));
         double finalGrade = ((summary.TotalLab / summary.CountLab) * ACTIVITYANDLAB_PERCENTAGE) +
                 ((summary.TotalActivity /summary.CountActivity) * ACTIVITYANDLAB_PERCENTAGE) +
                 ((summary.TotalExam / summary.CountExam) * EXAM_PERCENTAGE);
