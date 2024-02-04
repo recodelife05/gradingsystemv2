@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LoginPage extends JFrame {
-    private static int LOGINATTEMPTS = 3;
+    private int LOGINATTEMPTS = 3;
     private JTextField userNameTextField = new JTextField();
     private JPasswordField passwordTextField   = new JPasswordField();
     private JPanel panel = new JPanel();
@@ -45,9 +45,11 @@ public class LoginPage extends JFrame {
            pword.equals("admin123")){
             System.out.println("Login");
             DisplayMainPage();
-
-            return  true;
+            IsAuth = true;
+            return IsAuth;
         }
+
+        LOGINATTEMPTS += 1;
         System.out.println("Please enter the correct credentials");
         return false;
     }
@@ -61,7 +63,6 @@ public class LoginPage extends JFrame {
     }
 
     private void AddEvents(){
-
         loginButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
