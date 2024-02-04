@@ -46,7 +46,8 @@ public class GradingPage extends JFrame {
     String FINALEGRADE = "Final Grade";
 
     String CurrentUser;
-    JPanel mainPanel = new JPanel();
+    BufferedImage backgroundImage = ImageIO.read(new File("resource/background.jpg"));
+    ImagePanel mainPanel = new ImagePanel(backgroundImage);
     GradingPage(String UserName) throws URISyntaxException, IOException {
         CurrentUser = UserName;
         InitializedComponents();
@@ -60,8 +61,6 @@ public class GradingPage extends JFrame {
         userLabel.setText("Welcome: " + CurrentUser);
         mainPanel.add(userLabel);
 
-        BufferedImage image = ImageIO.read(new File("resource/background.jpg"));
-        var backgroundImage = new ImagePanel(image);
 
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -97,9 +96,6 @@ public class GradingPage extends JFrame {
         });
 
         AddSubModules();
-        backgroundImage.setOpaque(true);
-
-        mainPanel.add(backgroundImage,BorderLayout.CENTER);
 
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
