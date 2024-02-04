@@ -1,10 +1,18 @@
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -36,15 +44,24 @@ public class GradingPage extends JFrame {
     String LABGRADE = "Laboratory Grade";
     String EXAMGRADE = "Exam Grade";
     String FINALEGRADE = "Final Grade";
+
+    String CurrentUser;
     JPanel mainPanel = new JPanel();
-    GradingPage(){
+    GradingPage(String UserName) throws URISyntaxException, IOException {
+        CurrentUser = UserName;
         InitializedComponents();
         SetEvents();
     }
-    public void InitializedComponents(){
+    public void InitializedComponents() throws URISyntaxException, IOException {
         this.setTitle("Grading System");
         this.setSize(500,500);
         this.setLayout(new GridLayout(1, 3, 10, 10));
+        JLabel userLabel = new JLabel();
+        userLabel.setText("Welcome: " + CurrentUser);
+        mainPanel.add(userLabel);
+
+        BufferedImage image = ImageIO.read(new File("resource/background.jpg"));
+        var backgroundImage = new ImagePanel(image);
 
         mainPanel.setBounds(new Rectangle(500,500));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -80,6 +97,9 @@ public class GradingPage extends JFrame {
         });
 
         AddSubModules();
+        backgroundImage.setOpaque(true);
+
+        mainPanel.add(backgroundImage,BorderLayout.CENTER);
 
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -153,6 +173,33 @@ public class GradingPage extends JFrame {
                 System.out.println(CurrentSelectedActivity);
             }
         });
+    }
+
+    public class ImagePanel extends JPanel
+    {
+        private static final long serialVersionUID = 1L;
+        private Image image = null;
+        private int iWidth2;
+        private int iHeight2;
+
+        public ImagePanel(Image image)
+        {
+            this.image = image;
+            this.iWidth2 = image.getWidth(this)/2;
+            this.iHeight2 = image.getHeight(this)/2;
+        }
+
+
+        public void paintComponent(Graphics g)
+        {
+            super.paintComponent(g);
+            if (image != null)
+            {
+                int x = this.getParent().getWidth()/2 - iWidth2;
+                int y = this.getParent().getHeight()/2 - iHeight2;
+                g.drawImage(image,x,y,this);
+            }
+        }
     }
     public void AddAndDisplayRecord() throws Exception {
         var summary = new GradeSummary(grades);
