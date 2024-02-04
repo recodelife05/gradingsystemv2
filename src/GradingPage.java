@@ -50,6 +50,7 @@ public class GradingPage extends JFrame {
     GradingPage(String UserName) throws URISyntaxException, IOException {
         CurrentUser = UserName;
         InitializedComponents();
+        SetFontColor();
         SetEvents();
     }
     public void InitializedComponents() throws URISyntaxException, IOException {
@@ -58,6 +59,7 @@ public class GradingPage extends JFrame {
         this.setLayout(new GridLayout(1, 3, 10, 10));
         JLabel userLabel = new JLabel();
         userLabel.setText("Welcome: " + CurrentUser);
+
         mainPanel.add(userLabel);
 
 
@@ -101,6 +103,15 @@ public class GradingPage extends JFrame {
         getContentPane().add(mainPanel, BorderLayout.SOUTH);
         pack();
         setLocationRelativeTo(null);
+    }
+
+    private void SetFontColor(){
+        //https://codepen.io/HunorMarton/details/eWvewo
+        Color color = Color.getHSBColor(315,89,100);
+        totalLabLabel.setForeground(color);
+        totalExamLabel.setForeground(color);
+        finalGradeLabel.setForeground(color);
+        totalActivityLabel.setForeground(color);
     }
     private  void AddSubModules(){
 
